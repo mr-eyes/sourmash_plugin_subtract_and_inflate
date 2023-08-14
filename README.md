@@ -1,73 +1,42 @@
-# sourmash_plugin_xyz: a template for sourmash plugins
+# sourmash_plugin_subtract_and_inflate
 
-This is a good place to start if you're writing a plugin for
-[sourmash (sourmash-bio/sourmash/)](https://github.com/sourmash-bio/sourmash/).
-
-Note: plugins are not yet available in a released version of sourmash.
-
-## Instructions
-
-You can use this repo as a template repo to create a new plugin!
-
-See [this set of changes](https://github.com/ctb/sourmash_plugin_template_test1/pull/1) for the minimal diff needed to get a plugin working!
-
-### Building from a template:
-
-First, go to [the GitHub page](https://github.com/sourmash-bio/sourmash_plugin_template) and click "Use this template" to create a new repository.
-
-Clone that repository into your development space.
-
-Then, search for all places where 'xyz' is present, and replace
-'xyz' with the name of your plugin.
-
-Next, edit the code in `src/sourmash_plugin_xyz.py` to implement the plugin
-(you'll probably want to change the name of that file, too.)
-
-Then run `pip install .` to install and test your plugin! You can also
-run `pip install -e .` to install it in editable mode, which is more
-convenient for development.
-
-## Examples
-
-[sourmash_plugin_avro](https://github.com/sourmash-bio/sourmash_plugin_avro)
-and
-[sourmash_plugin_load_urls](https://github.com/sourmash-bio/sourmash_plugin_load_urls)
-are two examples you can follow.
-
-## Template docs for new plugin built from this template.
-
-Delete everything from this line on up and put in your new README ;).
-
-# sourmash_plugin_xyz
+sourmash does not currently support keeping abundance when subtracting two signatures. A possible solution is to do `sourmash sig subtract` and then `sourmash sig inflate`. This plugin does this in one step. It subtracts signatures from the first signature and then inflates its abundance (recovers the abundance). **The plugin also works on differently scaled signatures.**
 
 ## Installation
 
+Make sure you have an updated pip version:
+
+```bash
+# update pip
+pip install --upgrade pip
+
+# or 
+conda update pip
 ```
-pip install sourmash_plugin_xyz
+
+Then install the plugin:
+
+
+```
+pip install git+https://github.com/mr-eyes/sourmash_plugin_subtract_and_inflate
 ```
 
 ## Usage
 
-non-xyz info goes here!
-
-## Support
-
-We suggest filing issues in [the main sourmash issue tracker](https://github.com/dib-lab/sourmash/issues) as that receives more attention!
-
-## Dev docs
-
-`xyz` is developed at https://github.com/sourmash-bio/sourmash_plugin_template.
-
-### Generating a release
-
-Bump version number in `pyproject.toml` and push.
-
-Make a new release on github.
-
-Then pull, and:
-
-```
-python -m build
+```bash
+sourmash scripts subtract_and_inflate -k <ksize> -o <output> <signature1> <signature2> <signature3> ...
 ```
 
-followed by `twine upload dist/...`.
+```bash
+usage:  subtract_and_inflate [-h] [-q] [-d] -k K -o OUT sketches [sketches ...]
+
+positional arguments:
+  sketches           file(s) containing two or more sketches
+
+options:
+  -h, --help         show this help message and exit
+  -q, --quiet        suppress non-error output
+  -d, --debug        provide debugging output
+  -k K               kmer size
+  -o OUT, --out OUT  path to output signature file
+```
