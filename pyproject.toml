@@ -1,5 +1,3 @@
-# CTB: search for XYZ and replace with plugin-specific information!
-
 [project]
 name = "sourmash_plugin_subtract_and_inflate"
 description = "sourmash plugin to peform sig subtract with preserving abundance."
