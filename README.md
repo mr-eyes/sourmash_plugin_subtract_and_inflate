@@ -21,10 +21,12 @@ Then install the plugin:
 pip install git+https://github.com/mr-eyes/sourmash_plugin_subtract_and_inflate
 ```
 
-## Usage
+## Usage example
+
+This will subtract all of the hashes in `sketch_1.sig` and `sketch_2.sig` from `main_sketch.sig` and save it to `subtracted.sig`.
 
 ```bash
-sourmash scripts subtract_and_inflate -k <ksize> -o <output> <signature1> <signature2> <signature3> ...
+sourmash scripts subtract_and_inflate -k 51 -o subtracted.sig main_sketch.sig sketch_1.sig sketch_2.sig ...
 ```
 
 ```bash
