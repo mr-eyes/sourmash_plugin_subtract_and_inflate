@@ -51,8 +51,8 @@ class Command_SubtractAndInflate(CommandLinePlugin):
         main_sketch = all_sketches[0]
         other_sketches = all_sketches[1:]
 
-        main_sig = sourmash.load_file_as_signatures(main_sketch, ksize=args.ksize)
-        main_kmers = set(main_sig.minhash.keys())
+        main_sig = sourmash.load_one_signature(main_sketch, ksize=args.k)
+        main_kmers = set(main_sig.minhash.hashes.keys())
         # Check if there's abundance in the minhash
         if not main_sig.minhash.track_abundance:
             error("There is no abundance in the minhash.\nPlease use 'sourmash sig subtract' instead.")
@@ -64,12 +64,12 @@ class Command_SubtractAndInflate(CommandLinePlugin):
                 error("No kmers left to subtract")
                 sys.exit(1)
             try:
-                sig = sourmash.load_file_as_signatures(sketch_filename, ksize=args.ksize)
+                sig = sourmash.load_one_signature(sketch_filename, ksize=args.k)
             except Exception as e:
                 error(f"Error while loading signature from '{sketch_filename}'\nAre you sure it's a valid signature file and kSzie?\n{e}")
                 sys.exit(1)
 
-            main_kmers -= set(sig.minhash.keys())
+            main_kmers -= set(sig.minhash.hashes.keys())
 
         final_mh = main_sig.minhash.copy_and_clear().flatten()
         final_mh.add_many(main_kmers)
