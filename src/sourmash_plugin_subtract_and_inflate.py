@@ -52,15 +52,18 @@ class Command_SubtractAndInflate(CommandLinePlugin):
         other_sketches = all_sketches[1:]
 
         main_sig = sourmash.load_one_signature(main_sketch, ksize=args.k)
-        main_kmers = set(main_sig.minhash.hashes.keys())
+        main_kmers = dict(main_sig.minhash.hashes)
+
+
         # Check if there's abundance in the minhash
         if not main_sig.minhash.track_abundance:
             error("There is no abundance in the minhash.\nPlease use 'sourmash sig subtract' instead.")
             sys.exit(1)
-
+            
+        removed_kmers = 0
         for sketch_filename in other_sketches:
             notify(f"Subtracting {sketch_filename}")
-            if len(main_kmers) == 0:
+            if not main_kmers:
                 error("No kmers left to subtract")
                 sys.exit(1)
             try:
@@ -69,14 +72,18 @@ class Command_SubtractAndInflate(CommandLinePlugin):
                 error(f"Error while loading signature from '{sketch_filename}'\nAre you sure it's a valid signature file and kSzie?\n{e}")
                 sys.exit(1)
 
-            main_kmers -= set(sig.minhash.hashes.keys())
+            for hashed_kmer in sig.minhash.hashes.keys():
+                if hashed_kmer in main_kmers:
+                    removed_kmers += 1
+                    main_kmers.pop(hashed_kmer)            
 
         final_mh = main_sig.minhash.copy_and_clear().flatten()
-        final_mh.add_many(main_kmers)
+        final_mh.add_many(main_kmers.keys())
         final_mh = final_mh.inflate(main_sig.minhash)
 
         finalSig = sourmash.SourmashSignature(final_mh)
         with sourmash.sourmash_args.FileOutput(args.out, 'wt') as fp:
             sourmash.save_signatures([finalSig], fp=fp)
-            
+
+        notify(f"Removed {removed_kmers} kmers.")
         notify(f"Saved final signature to '{args.out}'")
