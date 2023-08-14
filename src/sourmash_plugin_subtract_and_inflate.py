@@ -41,6 +41,7 @@ class Command_SubtractAndInflate(CommandLinePlugin):
 
         subparser.add_argument('sketches', nargs='+', help="file(s) containing two or more sketches")
         subparser.add_argument('-k', type=int, help='kmer size', required=True)
+        subparser.add_argument('-f', '--force', action='store_true', default = False, help='write signature even if no hashes remain after subtraction')
         subparser.add_argument('-o', '--out', type=str, help='path to output signature file', required=True)
 
     def main(self, args):
@@ -65,6 +66,15 @@ class Command_SubtractAndInflate(CommandLinePlugin):
             notify(f"Subtracting {sketch_filename}")
             if not main_kmers:
                 error("No kmers left to subtract")
+                if args.force:
+                    notify("Forcing output")
+                    final_mh = main_sig.minhash.copy_and_clear().flatten()
+                    finalSig = sourmash.SourmashSignature(final_mh)
+                    with sourmash.sourmash_args.FileOutput(args.out, 'wt') as fp:
+                        sourmash.save_signatures([finalSig], fp=fp)
+                    notify(f"Saved final EMPTY signature to '{args.out}'")
+                    sys.exit(0)
+                    
                 sys.exit(1)
             try:
                 sig = sourmash.load_one_signature(sketch_filename, ksize=args.k)
